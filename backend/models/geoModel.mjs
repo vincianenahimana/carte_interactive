@@ -1,5 +1,4 @@
 import client from "../config/db.mjs";
-
 export async function getGeoData() {
   const query = `
      SELECT 
@@ -18,6 +17,7 @@ export async function getGeoData() {
         type_et_entite,
         ST_AsGeoJSON(wkb_geometry) AS geojson
     FROM taux_chomage_15_64
+    LIMIT 2
     `;
 
   try {
