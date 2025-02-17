@@ -11,14 +11,44 @@
 </head>
 <body>
     <header class="header">
-        <p>Taux de chômage administratif de Wallonie</p>
+        <p>Taux de chômage administratif en Wallonie</p>
     </header>
-    <div id="map">
-
+    <div class="container">
+    <div>
+        <fieldset>
+<legend>Sélectionner un type d'entité :</legend>
+            <input type="radio" name="entite" id="Province" value="Province" checked/>
+            <label for="Province">Province</label><br>
+            <input type="radio" name="entite" id="Arrondissement" value="Arrondissement" />
+            <label for="Arrondissement">Arrondissement</label><br>
+            <input type="radio" name="entite" id="Commune" value="Commune" />
+            <label for="Commune">Commune</label>
+        </fieldset>
     </div>
+        <div id="map">
+
+        </div>
+<!--     
+        <div id="table_rank">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Type</td>
+                        <td>Entité</td>
+                        <td>Taux</td>
+                    </tr>
+                </thead>
+                <tbody id="table_body_rank">
+
+                </tbody>
+            </table>
+        </div> -->
+    </div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""></script>
+    <script type="module" src="tableData.js"></script>
     <script type="module" src="map.js"></script>
 </body>
 </html>
