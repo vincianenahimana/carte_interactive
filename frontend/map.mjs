@@ -1,3 +1,6 @@
+import { colorGeoJSON} from "./utils/geoUtilitesFonctions.mjs";
+
+
 //configure the map center and zoom
 
 window.map = L.map("map", {
@@ -29,6 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+//Update the value of entiteSelected when the button changes
 document.querySelectorAll('input[name="entite"]').forEach(radio => {
   radio.addEventListener('change', async () => {
     entiteSelected = getSelectedEntite(); 
@@ -63,6 +67,9 @@ function createGeoJSONLayer(data) {
   }
 
 geojsonLayer = L.geoJSON(geodata, {
+  style: function(feature){
+    return colorGeoJSON(feature.properties.taux_de_chomage_administratif_des_15_64_ans)
+  },
   onEachFeature : function (feature, layer) {
     const popupContent = `
   <div>
@@ -81,7 +88,7 @@ geojsonLayer = L.geoJSON(geodata, {
 }
 
 // Tile Layer
-const openstreetmapTileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
