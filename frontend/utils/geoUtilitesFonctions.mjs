@@ -17,6 +17,7 @@ export function colorGeoJSON(taux) {
 
     return  {
         color: "white",
+        weight:0.5,
         fillColor: fillColor,
         fillOpacity : 0.8
     }
