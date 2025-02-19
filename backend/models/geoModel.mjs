@@ -1,6 +1,6 @@
 import client from "../config/db.mjs";
-export async function getGeoData(typeEntite) {
-  const query = `
+
+const queryAll = `
      SELECT 
         ogc_fid, 
         ins, 
@@ -16,35 +16,68 @@ export async function getGeoData(typeEntite) {
     WHERE type_entite = $1
     `;
 
-  try {
-    const response = await client.query(query,[typeEntite]);
-    const results = response.rows;
-    return results;
-  } catch (error) {
-    console.error(error);
-  }
-}
 
-export async function getFiveFirstData() {
-  const query = `
+const queryMax = `
      SELECT 
         ogc_fid, 
         ins, 
         type_entite, 
         entite, 
+        periode, 
         taux_de_chomage_administratif_des_15_64_ans,
         taux_de_chomage_administratif_des_hommes_de_15_64_ans,
         taux_de_chomage_administratif_des_femmes_de_15_64_ans,
         type_et_entite
     FROM taux_chomage_15_64
+    WHERE type_entite = $1
     ORDER BY taux_de_chomage_administratif_des_15_64_ans DESC
-    LIMIT 5;
-    `;
+    LIMIT 1;
+    `
 
-  try {
-    const response = await client.query(query);
-    const results = response.rows;
-    return results;
+    const queryMin = `
+    SELECT 
+       ogc_fid, 
+       ins, 
+       type_entite, 
+       entite, 
+       periode, 
+       taux_de_chomage_administratif_des_15_64_ans,
+       taux_de_chomage_administratif_des_hommes_de_15_64_ans,
+       taux_de_chomage_administratif_des_femmes_de_15_64_ans,
+       type_et_entite
+   FROM taux_chomage_15_64
+   WHERE type_entite = $1
+   ORDER BY taux_de_chomage_administratif_des_15_64_ans ASC
+   LIMIT 1;
+   `
+
+
+export async function getGeoData(typeEntite) {
+   try {
+    const responseAll = await client.query(queryAll,[typeEntite]);
+    
+    const results = responseAll.rows;
+    
+    let maxEntity = null;
+    let minEntity = null;
+
+
+  const responseMax= await client.query(queryMax,[typeEntite]);
+   if (responseMax.rows.length>0) {
+    maxEntity = responseMax.rows[0];
+   }
+
+   const responseMin = await client.query(queryMin,[typeEntite]);
+   if(responseMin.rows.length>0) {
+      minEntity = responseMin.rows[0];
+   }
+
+   return {
+    results,
+    maxEntity,
+    minEntity
+   }
+
   } catch (error) {
     console.error(error);
   }
