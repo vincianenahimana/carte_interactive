@@ -67,7 +67,7 @@ body {
 
 #parameters {
     width: 25%;
-    font-size: small;
+    font-size:medium;
 }
 
 #table_rank {
@@ -104,4 +104,13 @@ body {
 
 #table_rank td {
     text-align: center;
+}
+
+.arrow {
+    width: 12px;
+}
+
+.taux {
+    display: flex;
+    gap: 5px;
 }
