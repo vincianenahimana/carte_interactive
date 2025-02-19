@@ -65,6 +65,11 @@ body {
     display:flex
 }
 
+#parameters {
+    width: 25%;
+    font-size: small;
+}
+
 #table_rank {
     width: 100%;
     max-width: 400px;
