@@ -1,14 +1,19 @@
 import { colorGeoJSON} from "./utils/geoUtilitesFonctions.mjs";
 
+const entityMaxPercentSpan= document.getElementById('entity-max')
+const entityMinPercentSpan= document.getElementById('entity-min')
 
 //configure the map center and zoom
 
 window.map = L.map("map", {
   center: [50.14510985147266, 5.48413997714843],
   zoom: 8,
+  attributionControl : false
 });
 
 //Fetch data 
+
+let dataAll = null
 
 let geodata = null
 
@@ -25,10 +30,16 @@ function getSelectedEntite() {
 // Update the value of entiteSelected on page load
 document.addEventListener('DOMContentLoaded', async () => {
   entiteSelected = getSelectedEntite(); 
-  geodata = await fetchData(); //Fetch data on page load
+  dataAll = await fetchData(); //Fetch data on page load
+  geodata = dataAll.geodata
 
-  if(geodata){
+  const entityMaxPercent =dataAll.entityMaxPercent
+  const entityMinPercent = dataAll.entityMinPercent
+  console.log(entityMaxPercent)
+  if(dataAll){
     createGeoJSONLayer(geodata)
+    entityMaxPercentSpan.innerText = `${entityMaxPercent.type_entite} ${entityMaxPercent.entite}: ${entityMaxPercent.taux_de_chomage_administratif_des_15_64_ans}% `
+    entityMinPercentSpan.innerText = `${entityMinPercent.type_entite} ${entityMinPercent.entite}: ${entityMinPercent.taux_de_chomage_administratif_des_15_64_ans}% `
   }
 });
 
@@ -36,10 +47,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 document.querySelectorAll('input[name="entite"]').forEach(radio => {
   radio.addEventListener('change', async () => {
     entiteSelected = getSelectedEntite(); 
-    geodata = await fetchData(); // Refetch data each time the entity changes
-
+    dataAll = await fetchData(); // Refetch data each time the entity changes
+    geodata = dataAll.geodata
+    const entityMaxPercent =dataAll.entityMaxPercent
+    const entityMinPercent = dataAll.entityMinPercent
     if(geodata) {
       createGeoJSONLayer(geodata)
+    entityMaxPercentSpan.innerText = `${entityMaxPercent.type_entite} ${entityMaxPercent.entite}: ${entityMaxPercent.taux_de_chomage_administratif_des_15_64_ans}% `
+    entityMinPercentSpan.innerText = `${entityMinPercent.type_entite} ${entityMinPercent.entite}: ${entityMinPercent.taux_de_chomage_administratif_des_15_64_ans}% `
     }
   });
 });
@@ -52,8 +67,15 @@ async function fetchData() {
       throw new Error("Error fetching data");
     }
     const data = await response.json(); 
+    const geodata = data.dataFormatted;
+    const entityMaxPercent = data.entityMaxPercent;
+    const entityMinPercent = data.entityMinPercent;
      // You can process the data here
-    return data;
+    return {
+      geodata:geodata,
+      entityMaxPercent: entityMaxPercent,
+      entityMinPercent: entityMinPercent
+    }
   } catch (error) {
     console.error(error);
   }
@@ -94,3 +116,16 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 
+//Add attribution data
+
+const attributionData = 'Données GeoJSON (fevrier 2025) : Source <a href="https://www.odwb.be/pages/home/">Open Data Wallonie-Bruxelles</a>'
+
+const attributionControl = L.control.attribution({
+  position: 'bottomright'
+}).addTo(map);
+
+attributionControl.addAttribution(attributionData);
+
+//TODO Add Legend data
+
+//TODO factorize the code
