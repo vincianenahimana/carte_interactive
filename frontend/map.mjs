@@ -1,60 +1,59 @@
-import { colorGeoJSON} from "./utils/geoUtilitesFonctions.mjs";
+import { colorGeoJSON } from "./utils/geoUtilitesFonctions.mjs";
 
-const entityMaxPercentSpan= document.getElementById('entity-max')
-const entityMinPercentSpan= document.getElementById('entity-min')
+const entityMaxPercentSpan = document.getElementById("entity-max");
+const entityMinPercentSpan = document.getElementById("entity-min");
 
 //configure the map center and zoom
 
-window.map = L.map("map", {
-  center: [50.14510985147266, 5.48413997714843],
+const map = L.map("map", {
+  center: [50.180445350420676, 4.65530236459824],
   zoom: 8,
-  attributionControl : false
+  attributionControl: false,
 });
 
-//Fetch data 
+//Fetch data
 
-let dataAll = null
+let dataAll = null;
 
-let geodata = null
+let geodata = null;
 
 let geojsonLayer = null;
 
-let entiteSelected = ""; 
+let entiteSelected = "";
 
 // Function to get the selected entity
 function getSelectedEntite() {
   const selectedRadio = document.querySelector('input[name="entite"]:checked');
-  return selectedRadio.value
+  return selectedRadio.value;
 }
 
 // Update the value of entiteSelected on page load
-document.addEventListener('DOMContentLoaded', async () => {
-  entiteSelected = getSelectedEntite(); 
+document.addEventListener("DOMContentLoaded", async () => {
+  entiteSelected = getSelectedEntite();
   dataAll = await fetchData(); //Fetch data on page load
-  geodata = dataAll.geodata
+  geodata = dataAll.geodata;
 
-  const entityMaxPercent =dataAll.entityMaxPercent
-  const entityMinPercent = dataAll.entityMinPercent
-  console.log(entityMaxPercent)
-  if(dataAll){
-    createGeoJSONLayer(geodata)
-    entityMaxPercentSpan.innerText = `${entityMaxPercent.type_entite} ${entityMaxPercent.entite}: ${entityMaxPercent.taux_de_chomage_administratif_des_15_64_ans}% `
-    entityMinPercentSpan.innerText = `${entityMinPercent.type_entite} ${entityMinPercent.entite}: ${entityMinPercent.taux_de_chomage_administratif_des_15_64_ans}% `
+  const entityMaxPercent = dataAll.entityMaxPercent;
+  const entityMinPercent = dataAll.entityMinPercent;
+  if (dataAll) {
+    createGeoJSONLayer(geodata);
+    entityMaxPercentSpan.innerText = `${entityMaxPercent.type_entite} ${entityMaxPercent.entite}: ${entityMaxPercent.taux_de_chomage_administratif_des_15_64_ans}% `;
+    entityMinPercentSpan.innerText = `${entityMinPercent.type_entite} ${entityMinPercent.entite}: ${entityMinPercent.taux_de_chomage_administratif_des_15_64_ans}% `;
   }
 });
 
 //Update the value of entiteSelected when the button changes
-document.querySelectorAll('input[name="entite"]').forEach(radio => {
-  radio.addEventListener('change', async () => {
-    entiteSelected = getSelectedEntite(); 
+document.querySelectorAll('input[name="entite"]').forEach((radio) => {
+  radio.addEventListener("change", async () => {
+    entiteSelected = getSelectedEntite();
     dataAll = await fetchData(); // Refetch data each time the entity changes
-    geodata = dataAll.geodata
-    const entityMaxPercent =dataAll.entityMaxPercent
-    const entityMinPercent = dataAll.entityMinPercent
-    if(geodata) {
-      createGeoJSONLayer(geodata)
-    entityMaxPercentSpan.innerText = `${entityMaxPercent.type_entite} ${entityMaxPercent.entite}: ${entityMaxPercent.taux_de_chomage_administratif_des_15_64_ans}% `
-    entityMinPercentSpan.innerText = `${entityMinPercent.type_entite} ${entityMinPercent.entite}: ${entityMinPercent.taux_de_chomage_administratif_des_15_64_ans}% `
+    geodata = dataAll.geodata;
+    const entityMaxPercent = dataAll.entityMaxPercent;
+    const entityMinPercent = dataAll.entityMinPercent;
+    if (geodata) {
+      createGeoJSONLayer(geodata);
+      entityMaxPercentSpan.innerText = `${entityMaxPercent.type_entite} ${entityMaxPercent.entite}: ${entityMaxPercent.taux_de_chomage_administratif_des_15_64_ans}% `;
+      entityMinPercentSpan.innerText = `${entityMinPercent.type_entite} ${entityMinPercent.entite}: ${entityMinPercent.taux_de_chomage_administratif_des_15_64_ans}% `;
     }
   });
 });
@@ -62,38 +61,40 @@ document.querySelectorAll('input[name="entite"]').forEach(radio => {
 // Function to fetch data from the API
 async function fetchData() {
   try {
-    const response = await fetch(`http://localhost:3000/api/geodata?type_entite=${entiteSelected}`);
+    const response = await fetch(
+      `http://localhost:3000/api/geodata?type_entite=${entiteSelected}`
+    );
     if (!response.ok) {
       throw new Error("Error fetching data");
     }
-    const data = await response.json(); 
+    const data = await response.json();
     const geodata = data.dataFormatted;
     const entityMaxPercent = data.entityMaxPercent;
     const entityMinPercent = data.entityMinPercent;
-     // You can process the data here
+    // You can process the data here
     return {
-      geodata:geodata,
+      geodata: geodata,
       entityMaxPercent: entityMaxPercent,
-      entityMinPercent: entityMinPercent
-    }
+      entityMinPercent: entityMinPercent,
+    };
   } catch (error) {
     console.error(error);
   }
 }
 
-
 function createGeoJSONLayer(data) {
-
   if (geojsonLayer) {
     map.removeLayer(geojsonLayer);
   }
 
-geojsonLayer = L.geoJSON(geodata, {
-  style: function(feature){
-    return colorGeoJSON(feature.properties.taux_de_chomage_administratif_des_15_64_ans)
-  },
-  onEachFeature : function (feature, layer) {
-    const popupContent = `
+  geojsonLayer = L.geoJSON(geodata, {
+    style: function (feature) {
+      return colorGeoJSON(
+        feature.properties.taux_de_chomage_administratif_des_15_64_ans
+      );
+    },
+    onEachFeature: function (feature, layer) {
+      const popupContent = `
   <div>
     <p>Entite : ${feature.properties.type_entite}</p>
     <p>Nom : ${feature.properties.entite}</p>
@@ -102,30 +103,51 @@ geojsonLayer = L.geoJSON(geodata, {
     <p>Taux Femmes : ${feature.properties.taux_de_chomage_administratif_des_femmes_de_15_64_ans}%</p>
   </div>
     `;
-    const popup = L.popup().setContent(popupContent);
-    layer.bindPopup(popup);
-  }
-}).addTo(map)
-
+      const popup = L.popup().setContent(popupContent);
+      layer.bindPopup(popup);
+    },
+  }).addTo(map);
 }
 
 // Tile Layer
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 19,
+  attribution:
+    '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 }).addTo(map);
-
 
 //Add attribution data
 
-const attributionData = 'Données GeoJSON (fevrier 2025) : Source <a href="https://www.odwb.be/pages/home/">Open Data Wallonie-Bruxelles</a>'
+const attributionData =
+  'Données GeoJSON (fevrier 2025) : Source <a href="https://www.odwb.be/pages/home/">Open Data Wallonie-Bruxelles</a>';
 
-const attributionControl = L.control.attribution({
-  position: 'bottomright'
-}).addTo(map);
+const attributionControl = L.control
+  .attribution({
+    position: "bottomright",
+  })
+  .addTo(map);
 
 attributionControl.addAttribution(attributionData);
 
-//TODO Add Legend data
+//TODO Add Legend data to the map
+const divSteps = document.getElementById("steps");
+const divColors = document.getElementById("colors");
+const steps = ["0%-5%", "5%-10%", "10%-15%", "15%-20%", ">20%"];
+const colors = ["#c4b5b5", "#da9694", "#e7756e", "#ec4f44", "#eb1212"];
+
+for (let index = 0; index < steps.length; index++) {
+  const step = steps[index];
+  const color = colors[index];
+  const divStep = document.createElement("div");
+  divStep.id = `div-background${index}`;
+  const divColor = document.createElement("div")
+  divColor.id = `div-step${index}`;
+  divColor.textContent = step;
+  divColor.style.backgroundColor = color;
+  divSteps.appendChild(divStep);
+  divColors.appendChild(divColor)
+}
+
+//background-image: linear-gradient(to right, #c4b5b5, #da9694, #e7756e, #ec4f44, #eb1212);
 
 //TODO factorize the code
